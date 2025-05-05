@@ -1,0 +1,8 @@
+---
+- name: Install Kubernetes CLI
+  hosts: all
+  become: true
+  roles:
+    - role: kubernetes_cli
+      # Uncomment and update to install a specific version
+      # kubectl_version: "v1.28.0"

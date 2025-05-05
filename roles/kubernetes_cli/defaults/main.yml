@@ -1,0 +1,35 @@
+---
+# defaults file for kubernetes_cli
+
+# kubectl version to install (defaults to latest stable)
+kubectl_version: "stable"
+
+# Installation directory
+kubectl_install_dir: "/usr/local/bin"
+
+# Owner and mode for the kubectl binary
+kubectl_owner: "root"
+kubectl_group: "root"
+kubectl_mode: "0755"
+
+# Whether to verify the kubectl binary's GPG signature
+kubectl_verify_signature: true
+
+# Temp directory for downloads
+kubectl_temp_dir: "/tmp/kubectl_install"
+
+# OS specific settings
+kubectl_os_map:
+  Linux: "linux"
+  Darwin: "darwin"
+
+# Architecture specific settings
+kubectl_arch_map:
+  x86_64: "amd64"
+  amd64: "amd64"
+  arm64: "arm64"
+  aarch64: "arm64"
+  armv7l: "arm"
+  armv6l: "arm"
+  ppc64le: "ppc64le"
+  s390x: "s390x"

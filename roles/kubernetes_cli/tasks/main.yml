@@ -1,0 +1,73 @@
+---
+# tasks file for kubernetes_cli
+
+- name: Ensure temp directory exists
+  file:
+    path: "{{ kubectl_temp_dir }}"
+    state: directory
+    mode: '0755'
+  become: true
+
+- name: Determine OS and architecture
+  set_fact:
+    kubectl_os: "{{ kubectl_os_map[ansible_system] | default('linux') }}"
+    kubectl_arch: "{{ kubectl_arch_map[ansible_architecture] | default('amd64') }}"
+
+- name: Get latest stable kubectl version if requested
+  block:
+    - name: Get latest kubectl version
+      uri:
+        url: https://dl.k8s.io/release/stable.txt
+        return_content: yes
+      register: kubectl_stable_version
+      when: kubectl_version == "stable"
+
+    - name: Set kubectl version to latest stable
+      set_fact:
+        kubectl_version: "{{ kubectl_stable_version.content | trim }}"
+      when: kubectl_version == "stable"
+  when: kubectl_version == "stable"
+
+- name: Download kubectl binary
+  get_url:
+    url: "https://dl.k8s.io/release/{{ kubectl_version }}/bin/{{ kubectl_os }}/{{ kubectl_arch }}/kubectl"
+    dest: "{{ kubectl_temp_dir }}/kubectl"
+    mode: '0755'
+  become: true
+
+- name: Download kubectl checksum file
+  get_url:
+    url: "https://dl.k8s.io/release/{{ kubectl_version }}/bin/{{ kubectl_os }}/{{ kubectl_arch }}/kubectl.sha256"
+    dest: "{{ kubectl_temp_dir }}/kubectl.sha256"
+  become: true
+  when: kubectl_verify_signature
+
+- name: Verify kubectl binary
+  shell: |
+    echo "$(cat {{ kubectl_temp_dir }}/kubectl.sha256)  {{ kubectl_temp_dir }}/kubectl" | sha256sum --check
+  register: kubectl_verify_result
+  changed_when: false
+  failed_when: kubectl_verify_result.rc != 0
+  become: true
+  when: kubectl_verify_signature
+
+- name: Install kubectl binary
+  copy:
+    src: "{{ kubectl_temp_dir }}/kubectl"
+    remote_src: yes
+    dest: "{{ kubectl_install_dir }}/kubectl"
+    owner: "{{ kubectl_owner }}"
+    group: "{{ kubectl_group }}"
+    mode: "{{ kubectl_mode }}"
+  become: true
+
+- name: Verify kubectl installation
+  command: "{{ kubectl_install_dir }}/kubectl version --client"
+  register: kubectl_version_result
+  changed_when: false
+
+- name: Clean up temp directory
+  file:
+    path: "{{ kubectl_temp_dir }}"
+    state: absent
+  become: true

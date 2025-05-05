@@ -1,0 +1,35 @@
+---
+galaxy_info:
+  role_name: kubernetes_cli
+  author: IaC Tool Maintainers
+  description: Installs Kubernetes CLI (kubectl)
+  license: MIT
+  min_ansible_version: 2.9
+  platforms:
+    - name: EL
+      versions:
+        - 7
+        - 8
+        - 9
+    - name: Fedora
+      versions:
+        - all
+    - name: Debian
+      versions:
+        - buster
+        - bullseye
+        - bookworm
+    - name: Ubuntu
+      versions:
+        - focal
+        - jammy
+        - mantic
+  galaxy_tags:
+    - kubernetes
+    - kubectl
+    - k8s
+    - cli
+    - system
+    - tools
+
+dependencies: []
